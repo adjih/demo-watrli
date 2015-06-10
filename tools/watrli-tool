@@ -1,4 +1,4 @@
-#! /bin/sh -x
+#! /bin/sh
 #---------------------------------------------------------------------------
 # C.A. Inria 2015
 #---------------------------------------------------------------------------
@@ -12,12 +12,14 @@ APP_MY_REPO="https://github.com/adjih/nodes.git -b watrli-testfoo"
 
 RPLD_MY_REPO="https://github.com/adjih/rosandtech-rpld.git"
 
+#XXX: OPENOCD_CONFIG=./RIOT-adjih/boards/samr21-xpro/dist/openocd.cfg
 #--------------------------------------------------
 
 # Go to main dir
 test -e tools || { cd .. && test -e tools || exit 1 ; } 
 
-# Arg parsing
+# Arg parsing (XXX: this file has grown way beyond the ~3 initial options, 
+#   this structure should be changed)
 for i in "$@" ; do case $i in
     flash) DO_FLASH=yes ; shift ;;
     recompile) DO_RECOMPILE=yes ; shift ;;
@@ -25,9 +27,14 @@ for i in "$@" ; do case $i in
     orig) WITH_ORIG=yes ; shift ;;
     shell) DO_SHELL=yes ; shift ;;
     compile-rpl) DO_COMPILE_RPLD=yes; shift ;; # not used
-    start-rpi-rpl) DO_START_RPI=yes; shift ;;
+    rpi-setup) DO_RPI_SETUP=yes; shift ;;
+    rpi-dashboard) DO_RPI_DASHBOARD=yes; shift ;;
+    rpi-proxy) DO_RPI_PROXY=yes; shift ;;
+    rpi-rpld) DO_RPI_RPLD=yes; shift ;;
     ssh-rpi) DO_SSH_RPI=yes; shift ;;
     sniffer) DO_SNIFFER=yes; shift ;; # personnal stuff
+    dbg-server) DO_DBGSERVER=yes; shift ;;
+    reset) DO_RESET=yes; shift ;;
     *) echo "unknown option: $i" ; exit 1 ;;
 esac ; done
 
@@ -71,8 +78,23 @@ RPLDBIN=$D/rpld-adjih/rpld
 
 #....................
 
-test -n "${DO_START_RPI}" &&
-  { roxterm --fork -e 'ssh pi@rpi "sudo ./setup.sh ;sleep 5; ./start-rpld.sh"' \
+test -n "${DO_RPI_SETUP}" &&
+  { roxterm --fork -e 'ssh pi@rpi "sudo ./setup.sh ; printf "DONE"; sleep 5"' \
+    || exit 1 ; }
+
+test -n "${DO_RPI_DASHBOARD}" &&
+  { roxterm --fork -e \
+    'ssh pi@rpi "sudo ./dashboard.sh ; printf "DONE"; sleep 5"' \
+    || exit 1 ; }
+
+test -n "${DO_RPI_PROXY}" &&
+  { roxterm --fork -e \
+    'ssh pi@rpi "sudo ./start_proxy.sh ; printf "DONE"; sleep 5"' \
+    || exit 1 ; }
+
+test -n "${DO_RPI_RPLD}" &&
+  { roxterm --fork -e \
+    'ssh pi@rpi "sudo ./start-rpld.sh ; printf "DONE"; sleep 5"' \
     || exit 1 ; }
 
 test -n "${DO_SSH_RPI}" && { roxterm --fork -e 'ssh pi@rpi' || exit 1 ; }
@@ -90,6 +112,12 @@ test -e ${APPBIN} || { ( cd ${APPDIR} && make ) || exit 1 ; }
 
 test -n "${DO_FLASH}" && { ( cd ${APPDIR} && make flash ) || exit 1 ; }
 
+test -n "${DO_DBGSERVER}" && 
+  { ( cd ${APPDIR} && make debug-server ) || exit 1 ; } # XXX: need Ctrl-C
+
+test -n "${DO_RESET}" && 
+  { ( cd ${APPDIR} && make reset ) || exit 1 ; }
+
 test -n "${DO_TERM}" && { 
   R21TTY=`./tools/watrli-helper r21-first-tty` || exit 1 ; 
   ( cd ${APPDIR} && make term PORT=${R21TTY} ) || exit 1 ; }
@@ -101,5 +129,7 @@ test -n "${DO_SNIFFER}" &&
    cd ~/HgRep/OCARI-2014/Sniffer-OPERA || exit 1 ; # works only on my machine
    python moteSniffer.py --high-speed --channel 22 --tty ${Z1TTY} \
         sniffer-wireshark ; }
+
+test -n "${DO_SHELL}" && { cd ${APPDIR} && printf "shell:" && bash ; }
 
 #---------------------------------------------------------------------------
