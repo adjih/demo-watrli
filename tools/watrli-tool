@@ -1,0 +1,105 @@
+#! /bin/sh -x
+#---------------------------------------------------------------------------
+# C.A. Inria 2015
+#---------------------------------------------------------------------------
+
+RIOT_REPO="https://github.com/x3ro/RIOT -b testfoo"
+RIOT_WATRLI_REPO="https://github.com/watr-li/RIOT.git -b watrli"
+RIOT_MY_REPO="https://github.com/adjih/RIOT -b watrli-testfoo"
+
+APP_REPO="https://github.com/watr-li/nodes.git"
+APP_MY_REPO="https://github.com/adjih/nodes.git -b watrli-testfoo"
+
+RPLD_MY_REPO="https://github.com/adjih/rosandtech-rpld.git"
+
+#--------------------------------------------------
+
+# Go to main dir
+test -e tools || { cd .. && test -e tools || exit 1 ; } 
+
+# Arg parsing
+for i in "$@" ; do case $i in
+    flash) DO_FLASH=yes ; shift ;;
+    recompile) DO_RECOMPILE=yes ; shift ;;
+    term) DO_TERM=yes ; shift ;;
+    orig) WITH_ORIG=yes ; shift ;;
+    shell) DO_SHELL=yes ; shift ;;
+    compile-rpl) DO_COMPILE_RPLD=yes; shift ;; # not used
+    start-rpi-rpl) DO_START_RPI=yes; shift ;;
+    ssh-rpi) DO_SSH_RPI=yes; shift ;;
+    sniffer) DO_SNIFFER=yes; shift ;; # personnal stuff
+    *) echo "unknown option: $i" ; exit 1 ;;
+esac ; done
+
+#--------------------------------------------------
+# Download git repos
+
+#D=WatrLi
+D=.
+
+test -e $D || mkdir $D || exit 1
+
+test -e $D/RIOT-testfoo || 
+  { ( cd $D && git clone ${RIOT_REPO} RIOT-testfoo ) || exit 1 ; }
+test -e $D/RIOT-watrli  || 
+  { ( cd $D && git clone ${RIOT_WATRLI_REPO} RIOT-watrli ) || exit 1 ; }
+test -e $D/RIOT-adjih  || 
+  { ( cd $D && git clone ${RIOT_MY_REPO} RIOT-adjih ) || exit 1 ; }
+
+test -e $D/nodes-watrli || 
+  { ( cd $D && git clone ${APP_REPO} nodes-watrli )  || exit 1 ; }
+test -e $D/nodes-adjih || 
+  { ( cd $D && git clone ${APP_MY_REPO} nodes-adjih )  || exit 1 ; }
+
+test -e $D/rpld-adjih ||
+  { ( cd $D && git clone ${RPLD_MY_REPO} rpld-adjih )  || exit 1 ; }
+
+#--------------------------------------------------
+# Compile
+
+BOARD=samr21-xpro
+RIOTBASE=../../RIOT-adjih
+export BOARD RIOTBASE
+
+test -n "${WITH_ORIG}" && 
+   APPDIR=$D/nodes-watrli/plant_node || 
+   APPDIR=$D/nodes-adjih/plant_node
+APPBIN=${APPDIR}/bin/${BOARD}/plant_node.elf
+
+# Not used:
+RPLDBIN=$D/rpld-adjih/rpld 
+
+#....................
+
+test -n "${DO_START_RPI}" &&
+  { roxterm --fork -e 'ssh pi@rpi "sudo ./setup.sh ;sleep 5; ./start-rpld.sh"' \
+    || exit 1 ; }
+
+test -n "${DO_SSH_RPI}" && { roxterm --fork -e 'ssh pi@rpi' || exit 1 ; }
+
+#bash -c 'ssh pi@rpi "sudo ./setup.sh ; sleep 5; ./start-rpld.sh"' ||
+#    exit 1 ; }
+
+test -n "${DO_COMPILE_RPLD}" &&
+  { test -e ${RPLDBIN} ||
+    (cd $D/rpld-adjih || exit 1 ; sudo ./debian/rules binary )  || exit 1 ; }
+
+test -n "${DO_RECOMPILE}" && rm -f ${APPBIN}
+
+test -e ${APPBIN} || { ( cd ${APPDIR} && make ) || exit 1 ; }
+
+test -n "${DO_FLASH}" && { ( cd ${APPDIR} && make flash ) || exit 1 ; }
+
+test -n "${DO_TERM}" && { 
+  R21TTY=`./tools/watrli-helper r21-first-tty` || exit 1 ; 
+  ( cd ${APPDIR} && make term PORT=${R21TTY} ) || exit 1 ; }
+
+test -n "${DO_SHELL}" && { cd ${APPDIR} && printf "shell:" && bash ; }
+
+test -n "${DO_SNIFFER}" && 
+  { Z1TTY=`./tools/watrli-helper z1-first-tty` && 
+   cd ~/HgRep/OCARI-2014/Sniffer-OPERA || exit 1 ; # works only on my machine
+   python moteSniffer.py --high-speed --channel 22 --tty ${Z1TTY} \
+        sniffer-wireshark ; }
+
+#---------------------------------------------------------------------------

@@ -1,0 +1,80 @@
+#! /usr/bin/env python
+#---------------------------------------------------------------------------
+# C.A. - Inria - 2015
+#---------------------------------------------------------------------------
+
+import subprocess, os, re, sys, argparse
+import pprint
+import argparse
+
+def getUdevInfo(devName):
+    cmdLine = ("udevadm info --query=all --name=/dev/"+devName).split(" ")
+    infoList = (subprocess.check_output(cmdLine).decode("utf-8")).split("\n")
+    rVar = re.compile("E: (.+)=(.+)")
+    result = {}
+    for line in infoList:
+        m = rVar.match(line)
+        if m != None:
+            result[m.group(1)] = m.group(2)
+    return result
+
+def getHardwareList():
+    """Return the list of devices connected to USB ports"""
+    ttyAcmList = [x for x in os.listdir("/dev") if x.startswith("ttyACM")]
+    result = []
+    for ttyName in ttyAcmList:
+        udevInfo = getUdevInfo(ttyName)
+	if udevInfo.get("ID_SERIAL", "").find(
+		"R-Idge_6LoWPAN_USB_ROUTER") >= 0:
+            info = {
+                "tty": "/dev/"+ttyName,
+                "model": "6lowpan-router",
+                "serial": udevInfo.get("ID_SERIAL_SHORT", None)
+                }
+            result.append(info)
+        elif udevInfo.get("ID_SERIAL").find("EDBG_CMSIS-DAP_ATML") >= 0:
+            info = {
+                "tty": "/dev/"+ttyName,
+                "model": "samr21-xpro",
+                
+            }
+            result.append(info)
+        #else: pprint.pprint(udevInfo)
+
+    ttyUsbList = [x for x in os.listdir("/dev") if x.startswith("ttyUSB")]
+    for ttyName in ttyUsbList:
+        udevInfo = getUdevInfo(ttyName)
+	if udevInfo.get("ID_MODEL", "").find("Zolertia_Z1") >= 0:
+            info = {
+                "tty": "/dev/"+ttyName,
+                "model": "z1"
+            }
+            result.append(info)
+        #else: pprint.pprint(udevInfo)
+    
+    return result
+
+#XXX:TODO: parser = argparse.ArgumentParser()
+
+def getHardwareByModel(model):
+    nodeInfoList = getHardwareList()    
+    result = [ info for info in nodeInfoList 
+               if info.get("model") == model ]
+    return result
+
+def printFirstTtyOfModel(model):
+    modelList = getHardwareByModel(model)
+    if len(modelList) < 1:
+        sys.stderr.write("FATAL: cannot find any '%s'.\n" % model)
+        sys.exit(1)
+    modelList.sort()
+    print modelList[0]["tty"]
+    
+
+if "r21-first-tty" in sys.argv[1:]:
+    printFirstTtyOfModel("samr21-xpro")
+elif "z1-first-tty" in sys.argv[1:]:
+    printFirstTtyOfModel("z1")
+else: raise RuntimeError("Incorrect args", " ".join(sys.argv[1:]) )
+
+#---------------------------------------------------------------------------
