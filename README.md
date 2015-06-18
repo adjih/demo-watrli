@@ -1,6 +1,6 @@
 Original demo from [watr.li](http://watr.li/)
 
-Using following repositories:
+Using following forks of repositories (forked from watr.li forks):
   * [RIOT](https://github.com/adjih/RIOT/commits/watrli-testfoo)
   * [application](https://github.com/adjih/nodes/commits/watrli-testfoo)
 
@@ -8,15 +8,17 @@ Using following repositories:
 
 ![watr.li](img/FrontPage.png)
 
-![architecture](img/Architecture.png)
+![architecture](img/Architecture.png) ![TkDemo](img/TkDemo.png)
 
 ---------------------------------------------------------------------------
 
 Running:
-1) Initial setup can be done through: tools/watrli-tool
+1) Initial setup can be done through: ```./tools/watrli-tool```
   (this will git clone some repositories)
-  bonus scripts are copying watr.li instructions (build-config.sh and build-openocd.sh) if you need
-2) tools/watrli-helper or tools/TkDemo.py can be used
+
+  bonus scripts are copying watr.li instructions (```build-config.sh``` and ```build-openocd.sh```) if you need
+
+2) ```./tools/watrli-tool``` or (```cd tools && python TkDemo.py```) can be used to run different steps of the demo
 
 ---------------------------------------------------------------------------
 
