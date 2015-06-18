@@ -1,3 +1,7 @@
+Original demo from [watr.li](watr.li)
+
+---------------------------------------------------------------------------
+
 ![watr.li](img/FrontPage.png)
 
 ![architecture](img/Architecture.png)
