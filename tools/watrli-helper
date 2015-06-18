@@ -50,6 +50,12 @@ def getHardwareList():
                 "model": "z1"
             }
             result.append(info)
+        elif udevInfo.get("ID_MODEL", "").find("M3") >= 0:
+            info = {
+                "tty": "/dev/"+ttyName,
+                "model": "m3"
+            }
+            result.append(info)            
         #else: pprint.pprint(udevInfo)
     
     return result
@@ -75,6 +81,8 @@ if "r21-first-tty" in sys.argv[1:]:
     printFirstTtyOfModel("samr21-xpro")
 elif "z1-first-tty" in sys.argv[1:]:
     printFirstTtyOfModel("z1")
+elif "m3-first-tty" in sys.argv[1:]:
+    printFirstTtyOfModel("m3")
 else: raise RuntimeError("Incorrect args", " ".join(sys.argv[1:]) )
 
 #---------------------------------------------------------------------------

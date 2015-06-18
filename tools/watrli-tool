@@ -15,12 +15,18 @@ RPLD_MY_REPO="https://github.com/adjih/rosandtech-rpld.git"
 #XXX: OPENOCD_CONFIG=./RIOT-adjih/boards/samr21-xpro/dist/openocd.cfg
 #--------------------------------------------------
 
+BOARD=samr21-xpro
+MODEL=r21
+RIOTBASE=../../RIOT-adjih
+export BOARD RIOTBASE
+
 # Go to main dir
 test -e tools || { cd .. && test -e tools || exit 1 ; } 
 
 # Arg parsing (XXX: this file has grown way beyond the ~3 initial options, 
 #   this structure should be changed)
 for i in "$@" ; do case $i in
+    iot-lab_M3) BOARD=iot-lab_M3 ; MODEL=m3; export BOARD ; shift ;;
     flash) DO_FLASH=yes ; shift ;;
     recompile) DO_RECOMPILE=yes ; shift ;;
     term) DO_TERM=yes ; shift ;;
@@ -28,6 +34,7 @@ for i in "$@" ; do case $i in
     shell) DO_SHELL=yes ; shift ;;
     compile-rpl) DO_COMPILE_RPLD=yes; shift ;; # not used
     rpi-setup) DO_RPI_SETUP=yes; shift ;;
+    rpi-clean-lock) DO_RPI_CLEAN_LOCK=yes; shift ;;
     rpi-dashboard) DO_RPI_DASHBOARD=yes; shift ;;
     rpi-proxy) DO_RPI_PROXY=yes; shift ;;
     rpi-rpld) DO_RPI_RPLD=yes; shift ;;
@@ -64,9 +71,6 @@ test -e $D/rpld-adjih ||
 #--------------------------------------------------
 # Compile
 
-BOARD=samr21-xpro
-RIOTBASE=../../RIOT-adjih
-export BOARD RIOTBASE
 
 test -n "${WITH_ORIG}" && 
    APPDIR=$D/nodes-watrli/plant_node || 
@@ -79,25 +83,30 @@ RPLDBIN=$D/rpld-adjih/rpld
 #....................
 
 test -n "${DO_RPI_SETUP}" &&
-  { roxterm --fork -e 'ssh pi@rpi "sudo ./setup.sh ; printf "DONE"; sleep 5"' \
+  { roxterm -T setup --fork -e 'ssh pi@rpi "sudo ./setup.sh ; printf "DONE"; sleep 5"' \
     || exit 1 ; }
 
 test -n "${DO_RPI_DASHBOARD}" &&
-  { roxterm --fork -e \
-    'ssh pi@rpi "sudo ./dashboard.sh ; printf "DONE"; sleep 5"' \
+  { roxterm -T Dashboard --fork -e \
+    'ssh pi@rpi "sudo ./dashboard.sh ; printf "DONE"; sleep 20"' \
+    || exit 1 ; }
+
+test -n "${DO_RPI_CLEAN_LOCK}" &&
+  { roxterm -T CleanLock --fork -e \
+    'ssh pi@rpi "sudo rm -vf stage/RUNNING_PID ; printf "DONE"; sleep 5"' \
     || exit 1 ; }
 
 test -n "${DO_RPI_PROXY}" &&
-  { roxterm --fork -e \
-    'ssh pi@rpi "sudo ./start_proxy.sh ; printf "DONE"; sleep 5"' \
+  { roxterm -T Proxy --fork -e \
+    'ssh pi@rpi "sudo killall nginx ; sleep 1 ; sudo ./start_proxy.sh ; printf "DONE"; sleep 5"' \
     || exit 1 ; }
 
 test -n "${DO_RPI_RPLD}" &&
-  { roxterm --fork -e \
-    'ssh pi@rpi "sudo ./start-rpld.sh ; printf "DONE"; sleep 5"' \
+  { roxterm -T rpld --fork -e \
+    'ssh pi@rpi "sudo killall rpld ; sudo ./start-rpld.sh ; printf "DONE"; sleep 5"' \
     || exit 1 ; }
 
-test -n "${DO_SSH_RPI}" && { roxterm --fork -e 'ssh pi@rpi' || exit 1 ; }
+test -n "${DO_SSH_RPI}" && { roxterm -T ssh-rpi --fork -e 'ssh pi@rpi' || exit 1 ; }
 
 #bash -c 'ssh pi@rpi "sudo ./setup.sh ; sleep 5; ./start-rpld.sh"' ||
 #    exit 1 ; }
@@ -118,9 +127,16 @@ test -n "${DO_DBGSERVER}" &&
 test -n "${DO_RESET}" && 
   { ( cd ${APPDIR} && make reset ) || exit 1 ; }
 
+#test -n "${DO_TERM}" && { 
+#  R21TTY=`./tools/watrli-helper ${MODEL}-first-tty` || exit 1 ; 
+#  ( cd ${APPDIR} && make term PORT=${R21TTY} ) || exit 1 ; }
+
 test -n "${DO_TERM}" && { 
-  R21TTY=`./tools/watrli-helper r21-first-tty` || exit 1 ; 
-  ( cd ${APPDIR} && make term PORT=${R21TTY} ) || exit 1 ; }
+  R21TTY=`./tools/watrli-helper ${MODEL}-first-tty` || exit 1 ; 
+  ( cd ${APPDIR} && roxterm -T Term-${MODEL} --fork \
+   -e "make term PORT=${R21TTY}"
+   ) || exit 1 ; }
+
 
 test -n "${DO_SHELL}" && { cd ${APPDIR} && printf "shell:" && bash ; }
 
