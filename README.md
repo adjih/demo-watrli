@@ -31,7 +31,7 @@ On the RPi, that was changed:
  * in contiki/core/net/rpl/rpl-conf.h
  * in contiki/core/net/rpl/rpl-private.h
 
-```DOUBLINGS = 1
-MIN = 11'''
+...DOUBLINGS = 1
+...MIN = 11
 
 ---------------------------------------------------------------------------
