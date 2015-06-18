@@ -3,11 +3,11 @@
 # C.A. Inria 2015
 #---------------------------------------------------------------------------
 
-RIOT_REPO="https://github.com/x3ro/RIOT -b testfoo"
-RIOT_WATRLI_REPO="https://github.com/watr-li/RIOT.git -b watrli"
+#RIOT_REPO="https://github.com/x3ro/RIOT -b testfoo"
+#RIOT_WATRLI_REPO="https://github.com/watr-li/RIOT.git -b watrli"
 RIOT_MY_REPO="https://github.com/adjih/RIOT -b watrli-testfoo"
 
-APP_REPO="https://github.com/watr-li/nodes.git"
+#APP_REPO="https://github.com/watr-li/nodes.git"
 APP_MY_REPO="https://github.com/adjih/nodes.git -b watrli-testfoo"
 
 RPLD_MY_REPO="https://github.com/adjih/rosandtech-rpld.git"
@@ -53,20 +53,20 @@ D=.
 
 test -e $D || mkdir $D || exit 1
 
-test -e $D/RIOT-testfoo || 
-  { ( cd $D && git clone ${RIOT_REPO} RIOT-testfoo ) || exit 1 ; }
-test -e $D/RIOT-watrli  || 
-  { ( cd $D && git clone ${RIOT_WATRLI_REPO} RIOT-watrli ) || exit 1 ; }
+#test -e $D/RIOT-testfoo || 
+#  { ( cd $D && git clone ${RIOT_REPO} RIOT-testfoo ) || exit 1 ; }
+#test -e $D/RIOT-watrli  || 
+#  { ( cd $D && git clone ${RIOT_WATRLI_REPO} RIOT-watrli ) || exit 1 ; }
 test -e $D/RIOT-adjih  || 
   { ( cd $D && git clone ${RIOT_MY_REPO} RIOT-adjih ) || exit 1 ; }
 
-test -e $D/nodes-watrli || 
-  { ( cd $D && git clone ${APP_REPO} nodes-watrli )  || exit 1 ; }
+#test -e $D/nodes-watrli || 
+#  { ( cd $D && git clone ${APP_REPO} nodes-watrli )  || exit 1 ; }
 test -e $D/nodes-adjih || 
   { ( cd $D && git clone ${APP_MY_REPO} nodes-adjih )  || exit 1 ; }
 
-test -e $D/rpld-adjih ||
-  { ( cd $D && git clone ${RPLD_MY_REPO} rpld-adjih )  || exit 1 ; }
+#test -e $D/rpld-adjih ||
+#  { ( cd $D && git clone ${RPLD_MY_REPO} rpld-adjih )  || exit 1 ; }
 
 #--------------------------------------------------
 # Compile
