@@ -1,3 +1,11 @@
+![watr.li](img/FrontPage.png)
+
+![architecture](img/Architecture.png)
+
+---------------------------------------------------------------------------
+
+The following steps (and more) are now available throught the small GUI
+  tools/TkDemo.py
 
 1) Do a "make debug-server" in RIOT/Application directory so that 
    the Sam R21 XPro is stopped (I guess)
