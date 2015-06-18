@@ -1,4 +1,4 @@
-Original demo from [watr.li](watr.li)
+Original demo from [watr.li](http://watr.li/)
 
 ---------------------------------------------------------------------------
 
