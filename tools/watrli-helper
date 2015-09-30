@@ -83,6 +83,8 @@ elif "z1-first-tty" in sys.argv[1:]:
     printFirstTtyOfModel("z1")
 elif "m3-first-tty" in sys.argv[1:]:
     printFirstTtyOfModel("m3")
+elif "all" in sys.argv[1:]:
+    pprint.pprint(getHardwareList())
 else: raise RuntimeError("Incorrect args", " ".join(sys.argv[1:]) )
 
 #---------------------------------------------------------------------------

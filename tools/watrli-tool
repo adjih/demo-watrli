@@ -20,6 +20,8 @@ MODEL=r21
 RIOTBASE=../../RIOT-adjih
 export BOARD RIOTBASE
 
+CHANNEL=22
+
 # Go to main dir
 test -e tools || { cd .. && test -e tools || exit 1 ; } 
 
@@ -27,6 +29,7 @@ test -e tools || { cd .. && test -e tools || exit 1 ; }
 #   this structure should be changed)
 for i in "$@" ; do case $i in
     iot-lab_M3) BOARD=iot-lab_M3 ; MODEL=m3; export BOARD ; shift ;;
+    fox) BOARD=fox ; MODEL=fox; export BOARD ; shift ;;
     flash) DO_FLASH=yes ; shift ;;
     recompile) DO_RECOMPILE=yes ; shift ;;
     term) DO_TERM=yes ; shift ;;
@@ -42,6 +45,7 @@ for i in "$@" ; do case $i in
     sniffer) DO_SNIFFER=yes; shift ;; # personnal stuff
     dbg-server) DO_DBGSERVER=yes; shift ;;
     reset) DO_RESET=yes; shift ;;
+    ch26) CHANNEL=26; shift ;;
     *) echo "unknown option: $i" ; exit 1 ;;
 esac ; done
 
@@ -143,7 +147,7 @@ test -n "${DO_SHELL}" && { cd ${APPDIR} && printf "shell:" && bash ; }
 test -n "${DO_SNIFFER}" && 
   { Z1TTY=`./tools/watrli-helper z1-first-tty` && 
    cd ~/HgRep/OCARI-2014/Sniffer-OPERA || exit 1 ; # works only on my machine
-   python moteSniffer.py --high-speed --channel 22 --tty ${Z1TTY} \
+   python moteSniffer.py --high-speed --channel ${CHANNEL} --tty ${Z1TTY} \
         sniffer-wireshark ; }
 
 test -n "${DO_SHELL}" && { cd ${APPDIR} && printf "shell:" && bash ; }

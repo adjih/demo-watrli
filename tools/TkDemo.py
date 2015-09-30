@@ -35,6 +35,9 @@ CommandList = [
     ("ssh-rpi", """./watrli-tool ssh-rpi"""),
     ("sniffer", 
      """roxterm -T sniffer -e bash -c './watrli-tool sniffer ; echo DONE ;sleep 10'&"""),
+    ("sniff 26", 
+     """roxterm -T sniffer -e bash -c './watrli-tool sniffer ch26 ; echo DONE ;sleep 10'&"""),
+
     ("wireshark", 'sudo wireshark -k -i lo -Y "zep" &'),
 
     ( "RPi Process", None),
@@ -56,7 +59,14 @@ CommandList = [
 
     ( "flash-m3", "./watrli-tool flash iot-lab_M3"),
     ( "reset-m3", "./watrli-tool reset iot-lab_M3"),
-    ( "term-m3", "./watrli-tool term iot-lab_M3")
+    ( "term-m3", "./watrli-tool term iot-lab_M3"),
+
+    ( "FOX", None ),
+
+    ( "flash-fox", "./watrli-tool flash fox"),
+    ( "reset-fox", "./watrli-tool reset fox"),
+    ( "term-fox", "./watrli-tool term fox")
+
 
     # ("reuse-port",
     #  """roxterm -T 'cmd' -e bash -c 'sudo bash -c "echo 1 > /proc/sys/net/ipv4/tcp_fin_timeout"; sudo bash -c "echo 1 > /proc/sys/net/ipv4/tcp_tw_recycle" ; sudo bash -c "echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse" ; echo DONE ;sleep 10' &"""),
