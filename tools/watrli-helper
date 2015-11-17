@@ -55,7 +55,13 @@ def getHardwareList():
                 "tty": "/dev/"+ttyName,
                 "model": "m3"
             }
-            result.append(info)            
+            result.append(info)      
+        elif udevInfo.get("ID_MODEL", "").find("FOX") >= 0:
+            info = {
+                "tty": "/dev/"+ttyName,
+                "model": "fox"
+            }
+            result.append(info)                  
         #else: pprint.pprint(udevInfo)
     
     return result
@@ -68,13 +74,13 @@ def getHardwareByModel(model):
                if info.get("model") == model ]
     return result
 
-def printFirstTtyOfModel(model):
+def printFirstTtyOfModel(model, index=0):
     modelList = getHardwareByModel(model)
     if len(modelList) < 1:
         sys.stderr.write("FATAL: cannot find any '%s'.\n" % model)
         sys.exit(1)
     modelList.sort()
-    print modelList[0]["tty"]
+    print modelList[index]["tty"]
     
 
 if "r21-first-tty" in sys.argv[1:]:
@@ -83,6 +89,8 @@ elif "z1-first-tty" in sys.argv[1:]:
     printFirstTtyOfModel("z1")
 elif "m3-first-tty" in sys.argv[1:]:
     printFirstTtyOfModel("m3")
+elif "fox-first-tty" in sys.argv[1:]:
+    printFirstTtyOfModel("fox")
 elif "all" in sys.argv[1:]:
     pprint.pprint(getHardwareList())
 else: raise RuntimeError("Incorrect args", " ".join(sys.argv[1:]) )

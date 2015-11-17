@@ -45,6 +45,7 @@ for i in "$@" ; do case $i in
     sniffer) DO_SNIFFER=yes; shift ;; # personnal stuff
     dbg-server) DO_DBGSERVER=yes; shift ;;
     reset) DO_RESET=yes; shift ;;
+    ch21) CHANNEL=21; shift ;;    
     ch26) CHANNEL=26; shift ;;
     *) echo "unknown option: $i" ; exit 1 ;;
 esac ; done
@@ -75,6 +76,18 @@ test -e $D/nodes-adjih ||
 #--------------------------------------------------
 # Compile
 
+if [ "${MODEL}" = "r21" ] ; then
+  # local work-around: one openocd works for R21, the others for other nodes
+  export PATH=/usr/bin:$PATH
+fi
+
+if [ "${MODEL}" = "fox" ] ; then
+  # local work-around: one openocd works for R21, the others for other nodes
+  export PATH=/usr/bin:$PATH
+fi
+
+
+#echo $PATH
 
 test -n "${WITH_ORIG}" && 
    APPDIR=$D/nodes-watrli/plant_node || 
