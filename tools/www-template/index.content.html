@@ -1,18 +1,14 @@
-<!doctype html>
-<html>
-<head>
-<title>CPU temperature</title>
+<h1>State</h1>
 <script src="http://code.jquery.com/jquery-2.0.0.js"></script>
 <script type="text/javascript" src="./javascript/RGraph.common.core.js" ></script>
 <script type="text/javascript" src="./javascript/RGraph.thermometer.js" ></script>
-</head>
-<body>
+
 <h2>Measurement</h2>
 <label id="conn_text"></label><br />
 <br>
-<label id="data_x">x: </label><br />
-<label id="data_y">y: </label><br />
-<label id="data_z">z: </label><br />
+<label id="data_x">x: </label>
+<label id="data_y">y: </label>
+<label id="data_z">z: </label>
 <label id="data_l">l: </label><br />
 <label id="data_info">info: </label><br />
 <br>
@@ -48,7 +44,7 @@
       drawGraph("cvs_x", "x", eval(current_temp[0]));
       drawGraph("cvs_y", "y", eval(current_temp[1]));
       drawGraph("cvs_z", "z", eval(current_temp[2]));
-      drawGraph("cvs_l", "l", eval(current_temp[3]));
+      //drawGraph("cvs_l", "l", eval(current_temp[3]));
     };
 
     ws.onclose = function(evt) {
@@ -92,6 +88,5 @@
 	
 </script>
 <br>
-<p style=""><a href="http://iot-projects.com/index.php?id=raspberry-pi-temperature-visualization-using-websocket">(HTML/websocket/javascript credit: Ratko Grbic)</a></p>
-</body>
-</html>
+
+<p><span style="font-size: 10%"><a href="http://iot-projects.com/index.php?id=raspberry-pi-temperature-visualization-using-websocket">(HTML/websocket/javascript credit: Ratko Grbic)</a></span></p>

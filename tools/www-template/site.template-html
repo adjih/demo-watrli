@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta name="description" content="Your description goes here" />
+  <meta name="keywords" content="your,keywords,goes,here" />
+  <meta name="author" content="Adjih" />
+  <link rel="stylesheet" type="text/css" href="andreas00.css" media="screen,projection" />
+  <title><TEMPLATE-TITLE></title>
+</head>
+
+<body>
+<div id="wrap">
+	<div id="header">
+	 <font color=#FAFAFA >	<h1></h1>
+	<p><b><h2></h2></b></p>
+	</font> 
+	</div>
+
+	<div id="leftside">
+		<h2 class="hide">Sample menu:</h2>
+		<ul class="avmenu">
+                       <TEMPLATE-MENU>
+                         <br>
+			<!--
+			<li>Menu1</li>
+			<li><a href="Menu2">Menu2</a></li>
+			-->
+		</ul>
+
+
+
+		
+	</div>
+
+	<div id="extras">
+		
+	<!-- img src="img/logo-inria.png" height="60" width="200" class="center" alt="Example content image" / -->
+		<h2>Related links:</h2>
+		<ul>
+			<li><a href="http://riot-os.org/">RIOT</a></li>
+			<li><a href="https://www.iot-lab.info">FIT IoT-LAB platform</a></li>
+			
+		</ul>
+
+		<div class="announce">
+			<h2>News:</h2>
+			<p><strong>ANNOUNCE:</strong><br />
+			<a href="https://riot-os.org/"> 
+			  RIOT Demo
+			</a>
+			<br clear="all">
+			 Booth <a href="TODO">#OSSParis</a>		
+			</p>
+			
+			<p><strong>December 2015</strong><br />
+ 
+			<p> 
+			
+			<!-- <p class="textright"><a href="https://sites.google.com/site/">Meeting&raquo;</a></p> -->
+		</div>
+	</div>
+
+
+<!-- ================================================== -->
+
+    <div id="content" style="text-align: justify;">
+
+    <TEMPLATE-CONTENT>
+
+    </div>
+
+<!-- ================================================== -->
+
+	<div id="footer">
+		<p><span style="font-size: 10%">&copy; 2015 <a href="#">the authors</a></span><br />
+		<!-- img src="img/logo-inria.png" height="40" width="100" class="center" alt="Example content image" / -->
+<span style="font-size: 10%;"> <a href="http://andreasviklund.com/templates/" title="Original CSS template design">Original design</a> by <a href="http://andreasviklund.com/" title="Andreas Viklund">Andreas Viklund</a> | Modified by <a href="http://Jasoncole.ca">Jason Cole</a> | Modified by <a href="http://fr.viadeo.com/fr/profile/hana.baccouch">Hana Baccouch</a> and C. Adjih </span></p>
+	</div>
+
+</div>
+</body>
+</html>

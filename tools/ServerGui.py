@@ -10,10 +10,12 @@ import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
 import tornado.web
-import os
+import os, socket
 import time
 
 #--------------------------------------------------
+
+OutPort = 5800
 
 wss =[]
 class WSHandler(tornado.websocket.WebSocketHandler):
@@ -60,15 +62,18 @@ def read_temp():
 
 def read_temp():
     global lastInfo
-    data = ";".join([str(x) for x in lastInfo +[time.time(), lastCoapAddr]])
+    data = ";".join([str(x) for x in lastInfo +[int(time.time()), lastCoapAddr]])
     wsSend(data)
 
 class ServerGui:
     def __init__(self):
         self.app = None
+        self.sd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def run(self):
-        root = os.path.dirname(__file__)+"/www"
+        #thisPath = os.path.dirname(__file__) # XXX: Hack
+        #os.system("cd " + thisPath + " && python DynamicHtml.py")
+        root = os.path.dirname(__file__)+"/www-generated"
         application = tornado.web.Application([
             (r"/", MainHandler),
             (r'/ws', WSHandler),
@@ -92,10 +97,12 @@ class ServerGui:
         #self.app.listen(8888)
         #tornado.ioloop.IOLoop.current().start()
 
-    def receiveCoap(self, srcAddr, msg):
+    def receiveCoap(self, srcAddr, msg, fullPath):
         payload = "".join((chr(x) for x in msg["payload"]))
         payloadInfo = payload.split(",")
-        print "COAP", srcAddr, payloadInfo
+        print "COAP", srcAddr, payload, "/".join(fullPath)
+        if len(fullPath) < 1 or fullPath[-1] != "sensor":
+          return
         try:
             payloadInfo = [int(x) for x in payloadInfo]
             if len(payloadInfo) != 4:
@@ -106,6 +113,7 @@ class ServerGui:
         global lastInfo, lastCoapAddr
         lastInfo = payloadInfo
         lastCoapAddr = srcAddr
+        self.sd.sendto(payload, ("", 7777))
         #print srcAddr, msg["options"], 
 
 #---------------------------------------------------------------------------
