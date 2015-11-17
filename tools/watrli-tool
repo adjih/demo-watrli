@@ -12,6 +12,8 @@ APP_MY_REPO="https://github.com/adjih/nodes.git -b watrli-testfoo"
 
 RPLD_MY_REPO="https://github.com/adjih/rosandtech-rpld.git"
 
+COAP_MY_REPO="https://github.com/adjih/coap.git -b demo-server-coap"
+
 #XXX: OPENOCD_CONFIG=./RIOT-adjih/boards/samr21-xpro/dist/openocd.cfg
 #--------------------------------------------------
 
@@ -31,11 +33,14 @@ for i in "$@" ; do case $i in
     iot-lab_M3) BOARD=iot-lab_M3 ; MODEL=m3; export BOARD ; shift ;;
     fox) BOARD=fox ; MODEL=fox; export BOARD ; shift ;;
     flash) DO_FLASH=yes ; shift ;;
+    flash-sensorapp) DO_FLASH_SENSORAPP=yes ; shift ;;
     recompile) DO_RECOMPILE=yes ; shift ;;
     term) DO_TERM=yes ; shift ;;
     orig) WITH_ORIG=yes ; shift ;;
     shell) DO_SHELL=yes ; shift ;;
     compile-rpl) DO_COMPILE_RPLD=yes; shift ;; # not used
+    border-router) DO_BORDER_ROUTER=yes; shift ;; # not used
+    coap-server) DO_COAP_SERVER=yes; shift ;; # not used
     rpi-setup) DO_RPI_SETUP=yes; shift ;;
     rpi-clean-lock) DO_RPI_CLEAN_LOCK=yes; shift ;;
     rpi-dashboard) DO_RPI_DASHBOARD=yes; shift ;;
@@ -73,6 +78,10 @@ test -e $D/nodes-adjih ||
 #test -e $D/rpld-adjih ||
 #  { ( cd $D && git clone ${RPLD_MY_REPO} rpld-adjih )  || exit 1 ; }
 
+test -e $D/coap-adjih || 
+  { ( cd $D && git clone ${COAP_MY_REPO} coap-adjih )  || exit 1 ; }
+
+
 #--------------------------------------------------
 # Compile
 
@@ -93,6 +102,8 @@ test -n "${WITH_ORIG}" &&
    APPDIR=$D/nodes-watrli/plant_node || 
    APPDIR=$D/nodes-adjih/plant_node
 APPBIN=${APPDIR}/bin/${BOARD}/plant_node.elf
+
+SENSORAPPDIR=$D/nodes-adjih/sensor_node
 
 # Not used:
 RPLDBIN=$D/rpld-adjih/rpld 
@@ -132,11 +143,25 @@ test -n "${DO_COMPILE_RPLD}" &&
   { test -e ${RPLDBIN} ||
     (cd $D/rpld-adjih || exit 1 ; sudo ./debian/rules binary )  || exit 1 ; }
 
+#'sudo killall rpld ; sudo ./start-linux-rpld.sh ; printf DONE; sleep 5' \
+test -n "${DO_BORDER_ROUTER}" &&
+  { roxterm -T rpld --fork -e \
+    bash -c "killall rpld ; cd `/bin/pwd` ; pwd ; sudo ./tools/start-linux-rpld.sh ; printf DONE; sleep 10" \
+    || exit 1 ; }
+
+test -n "${DO_COAP_SERVER}" &&
+  { roxterm -T CoapServer --fork -e \
+    bash -c "killall -9 demo_server.py ; sleep 1 ; cd coap-adjih/bin ; ./demo_server.py ; printf DONE; sleep 10" \
+    || exit 1 ; }
+
+
 test -n "${DO_RECOMPILE}" && rm -f ${APPBIN}
 
 test -e ${APPBIN} || { ( cd ${APPDIR} && make ) || exit 1 ; }
 
 test -n "${DO_FLASH}" && { ( cd ${APPDIR} && make flash ) || exit 1 ; }
+
+test -n "${DO_FLASH_SENSORAPP}" && { ( cd ${SENSORAPPDIR} && make flash ) || exit 1 ; }
 
 test -n "${DO_DBGSERVER}" && 
   { ( cd ${APPDIR} && make debug-server ) || exit 1 ; } # XXX: need Ctrl-C

@@ -81,8 +81,12 @@ def printFirstTtyOfModel(model, index=0):
         sys.exit(1)
     modelList.sort()
     print modelList[index]["tty"]
-    
 
+
+
+#---------------------------------------------------------------------------
+
+stop = True
 if "r21-first-tty" in sys.argv[1:]:
     printFirstTtyOfModel("samr21-xpro")
 elif "z1-first-tty" in sys.argv[1:]:
@@ -93,6 +97,48 @@ elif "fox-first-tty" in sys.argv[1:]:
     printFirstTtyOfModel("fox")
 elif "all" in sys.argv[1:]:
     pprint.pprint(getHardwareList())
+#else: raise RuntimeError("Incorrect args", " ".join(sys.argv[1:]) )
+else: stop = False
+
+if stop:
+    sys.exit(0)
+
+#---------------------------------------------------------------------------
+
+BoardLongName = {
+    "r21": "samr21-xpro",
+    "due": "arduino-due"
+}
+
+def cmdGetTty(args):
+    model = BoardLongName.get(args.board, args.board)
+    modelList = getHardwareByModel(model)
+    if len(modelList) < 1:
+        sys.stderr.write("FATAL: cannot find any '%s'.\n" % args.board)
+        sys.exit(1)
+    modelList.sort()
+    if args.all:
+        print " ".join([x["tty"] for x in modelList])
+    else: print (modelList[args.index]["tty"])
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", default=False, action="store_true")
+subparser = parser.add_subparsers(dest="cmd")
+
+ttyParser = subparser.add_parser("get-tty")
+ttyParser.add_argument("--index", type=int, default=0)
+ttyParser.add_argument("--all", action="store_true", default=False)
+ttyParser.add_argument("board", type=str)
+
+parser.add_argument("argList", type=str, nargs='*')
+args = parser.parse_args()
+
+
+if args.verbose:
+    print args
+
+if args.cmd == "get-tty":
+    cmdGetTty(args)
 else: raise RuntimeError("Incorrect args", " ".join(sys.argv[1:]) )
 
 #---------------------------------------------------------------------------

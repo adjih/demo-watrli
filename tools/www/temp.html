@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+<title>CPU temperature</title>
+<script src="http://code.jquery.com/jquery-2.0.0.js"></script>
+<script type="text/javascript" src="./javascript/RGraph.common.core.js" ></script>
+<script type="text/javascript" src="./javascript/RGraph.thermometer.js" ></script>
+</head>
+<body>
+<h2>Measurement</h2>
+<label id="conn_text"></label><br />
+<br>
+<label id="data_x">x: </label><br />
+<label id="data_y">y: </label><br />
+<label id="data_z">z: </label><br />
+<label id="data_l">l: </label><br />
+<label id="data_info">info: </label><br />
+<br>
+<br>
+<canvas id="cvs_x" width="150" height="200">[No canvas support]</canvas>
+<canvas id="cvs_y" width="150" height="200">[No canvas support]</canvas>
+<canvas id="cvs_z" width="150" height="200">[No canvas support]</canvas>
+<canvas id="cvs_l" width="150" height="200">[No canvas support]</canvas>
+
+<script>
+
+  $(document).ready(function () {
+    var ws = new WebSocket("ws://localhost:8888/ws");
+
+    ws.onopen = function(evt) {
+      var conn_status = document.getElementById('conn_text');
+      conn_status.innerHTML = "Status: Connected!"
+    };
+                
+    ws.onmessage = function(evt) {
+      var x_reading = document.getElementById('data_x');
+      var y_reading = document.getElementById('data_y');
+      var z_reading = document.getElementById('data_z');
+      var l_reading = document.getElementById('data_l');
+      var info_reading = document.getElementById('data_info');
+
+      info_reading.innerHTML = "info: " + evt.data;
+      current_temp = (evt.data).split(";");
+      x_reading.innerHTML = "x: " + current_temp[0]; 
+      y_reading.innerHTML = "y: " + current_temp[1];
+      z_reading.innerHTML = "z: " + current_temp[2];
+      l_reading.innerHTML = "l: " + current_temp[3];
+      drawGraph("cvs_x", "x", eval(current_temp[0]));
+      drawGraph("cvs_y", "y", eval(current_temp[1]));
+      drawGraph("cvs_z", "z", eval(current_temp[2]));
+      drawGraph("cvs_l", "l", eval(current_temp[3]));
+    };
+
+    ws.onclose = function(evt) {
+      var conn_status = document.getElementById('conn_text');
+      conn_status.innerHTML = "Status: disonnected!"
+    };
+  });
+
+  function drawGraph(canvasName, title, value){
+    var canvas = document.getElementById(canvasName);
+    RGraph.Clear(canvas);
+
+  
+    var thermometer = new RGraph.Thermometer(
+      canvasName, -1000, 1000, value)	
+    .set('title.side', title)
+    .set('value.label', false)
+    .set('scale.visible', true)
+    .set('scale.decimals',0)
+    .set('gutter.left', 80)
+    .set('gutter.right', 30)
+    .draw();
+  
+
+    /* var thermometer = new RGraph.VProgress({
+      id: canvasName, 
+      min:-1000, 
+      max: 1000,
+      value: value}).draw(); */
+/*    .set('title.side', title)
+    .set('value.label', false)
+    .set('scale.visible', true)
+    .set('scale.decimals',0)
+    .set('gutter.left', 80)
+    .set('gutter.right', 40)*/
+
+
+
+  }
+	
+	
+</script>
+<a href="http://iot-projects.com/index.php?id=raspberry-pi-temperature-visualization-using-websocket">(HTML/websocket/javascript credit: Ratko Grbic)</a>
+</body>
+</html>

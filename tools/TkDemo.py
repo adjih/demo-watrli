@@ -48,22 +48,32 @@ CommandList = [
     ( "rpi-proxy", "./watrli-tool rpi-proxy" ),
     ( "rpi-rpld", "./watrli-tool rpi-rpld" ),
 
+    ( "Linux", None ),
+
+    ( "border-router", "./watrli-tool border-router"),
+    ( "coap-server", "./watrli-tool coap-server"),
+    #( "reset-fox", "./watrli-tool reset fox"),
+    #( "term-fox", "./watrli-tool term fox")
+
     ( "SamR21 XPro", None),
 
     ( "stop-r21", "./watrli-tool dbg-server"),
     ( "flash-r21", "./watrli-tool flash"),
+    ( "sensorapp", "./watrli-tool flash-sensorapp"),
     ( "reset-r21", "./watrli-tool reset"),
     ( "term-r21", "./watrli-tool term"),
 
     ( "M3", None ),
 
-    ( "flash-m3", "./watrli-tool flash iot-lab_M3"),
-    ( "reset-m3", "./watrli-tool reset iot-lab_M3"),
-    ( "term-m3", "./watrli-tool term iot-lab_M3"),
+    ( "flash-m3",  "./watrli-tool flash iot-lab_M3"),
+    ( "sensorapp", "./watrli-tool flash-sensorapp iot-lab_M3"),
+    ( "reset-m3",  "./watrli-tool reset iot-lab_M3"),
+    ( "term-m3",   "./watrli-tool term iot-lab_M3"),
 
     ( "FOX", None ),
 
     ( "flash-fox", "./watrli-tool flash fox"),
+    ( "sensorapp", "./watrli-tool flash-sensorapp fox"),
     ( "reset-fox", "./watrli-tool reset fox"),
     ( "term-fox", "./watrli-tool term fox")
 
