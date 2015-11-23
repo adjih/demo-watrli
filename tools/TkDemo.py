@@ -52,6 +52,7 @@ CommandList = [
 
     ( "border-router", "./watrli-tool border-router"),
     ( "coap-server", "./watrli-tool coap-server"),
+    ( "web-plot", "./watrli-tool plotly"),
     #( "reset-fox", "./watrli-tool reset fox"),
     #( "term-fox", "./watrli-tool term fox")
 
