@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Simple Example</title>
+  </head>
+  <body>
+
+<h1>Display</h1>
+<script src="http://code.jquery.com/jquery-2.0.0.js"></script>
+
+<h2>Measurement</h2>
+
+<table border="1">
+  <tr>
+    <td>Websocket Status</td><td><label id="connection">-</label></td>
+  </tr>
+  <tr>
+    <td>Server time</td><td><label id="server_time">-</label></td>
+  </tr>
+  <tr>
+    <td colspan="2"><label id="last_ws">-</label></td>
+  </tr>
+</table>
+
+<canvas id="cvs" width="1024" height="768">[No canvas support]</canvas>
+
+<script>
+
+  $(document).ready(function () {
+    var ws = new WebSocket("ws://localhost:8888/ws");
+
+    ws.onopen = function(evt) {
+      var conn_status = document.getElementById('connection');
+      conn_status.innerHTML = "connected!"
+    };
+                
+    ws.onmessage = function(evt) {
+      var last_ws_text = document.getElementById('last_ws');
+      last_ws_text.innerHTML = evt.data;
+      // http://stackoverflow.com/questions/4935632/parse-json-in-javascript
+      var evtData = JSON.parse(evt.data);
+
+      if (evtData.type === "time") {
+        handleTimeMessage(evtData);
+      }
+
+    };
+
+    ws.onclose = function(evt) {
+      var conn_status = document.getElementById('connection');
+      conn_status.innerHTML = "disconnected!"
+    };
+  });
+
+  function handleTimeMessage(evtData) {
+     var server_time = document.getElementById('server_time');
+     server_time.innerHTML = evtData.time;
+  }
+
+</script>
+
+
+  
+  </body>
+</html>
