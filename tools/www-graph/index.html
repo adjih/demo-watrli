@@ -43,7 +43,7 @@
   var elemTable = new Object();
 
   $(document).ready(function () {
-    var ws = new WebSocket("ws://localhost:8888/ws");
+    var ws = new WebSocket("ws://localhost:8008/ws");
 
     ws.onopen = function(evt) {
       var conn_status = document.getElementById('connection');
@@ -60,8 +60,8 @@
         handleTimeMessage(evtData);
       } else if (evtData.type == "init") {
         handleInitMessage(evtData);
-      } else if (evtData.type == "create") {
-        handleCreateMessage(evtData);
+      } else if (evtData.type == "draw") {
+        handleDrawMessage(evtData);
       }
     };
 
@@ -110,48 +110,77 @@
      //circle.attr("stroke", "#fff");
   }
 
-  function handleCreateMessage(evtData) {
+  function handleDrawCmd(elem) {
+     cmd = elem[0];
+     if (cmd === "ball") {
+        var e = paper.ball(elem[1], elem[2], elem[3], elem[4]);
+        return e;
+     } else if (cmd === "line") {
+        //console.log("line " + elem[1]);
+        console.log(elem[1]);
+        var e = paper.path();
+        e.attr(elem[1])
+        return e;
+        //e.attr({ "stroke": elem[3], "stroke-width": elem[4]});
+        //if (elem.length > 4) {
+        //  e.attr({ "arrow-end": elem[5] });
+        //}
+        //elemTable[name] = e;
+      } else if (cmd === "circle") {
+        var e = paper.circle(elem[1], elem[2], elem[3]);
+        e.attr(elem[4])
+        return e;
+        //var e = paper.circle(elem[2], elem[3], elem[4]);
+        //e.attr("fill", elem[5]);
+        //e.attr("stroke", elem[6]);
+        //elemTable[name] = e;
+      } else {
+        console.log("unknown drawing:" + elem);
+      }
+  }
+
+  function handleUpdateCmd(name, newInfo) {
+     elemTable[name].attr(newInfo);
+  }
+
+  function handleDrawMessage(evtData) {
       //console.log("create");
 
      var i;
      for (i=0; i < evtData["content"].length; i++) {
        var elem = evtData["content"][i];
+       var name;
         // console.log(elem[1]);
-       name = elem[0];
-       if (elemTable.hasOwnProperty(name)) {
-          elemTable[name].remove();
+       cmd = elem[0];
+       if (elem.length > 1) {
+           name = elem[1];
        }
 
-       if (elem[1] === "delete") {
-         // implicit
-       } else if (elem[1] === "ball") {
-         // console.log(elem);
-         var e = paper.ball(elem[2], elem[3], elem[4], elem[5]);
-         elemTable[name] = e;
-       } else if (elem[1] === "line") {
-         var e = paper.path(elem[2]);
-         e.attr({ "stroke": elem[3], "stroke-width": elem[4]});
-         if (elem.length > 4) {
-           e.attr({ "arrow-end": elem[5] });
-         }
-         elemTable[name] = e;
-       } else if (elem[1] === "circle") {
-         var e = paper.circle(elem[2], elem[3], elem[4]);
-         e.attr("fill", elem[5]);
-         e.attr("stroke", elem[6]);
-         elemTable[name] = e;
-       } else {
+       if (cmd === "delete") {
+           if (elemTable.hasOwnProperty(name)) {
+             elemTable[name].remove();
+             delete elemTable[name];
+           } else {
+             console.log("delete: unknown, "+name);
+           }
+       } else if (cmd === "create") {
+           if (elemTable.hasOwnProperty(name)) {
+             elemTable[name].remove();
+             delete elemTable[name];
+             console.log("create: existing, "+name);
+           }
+           elemTable[name] = handleDrawCmd(elem[2]);
+       } else if (cmd === "update") {
+           if (!elemTable.hasOwnProperty(name)) {
+             console.log("update: unknown, "+name);
+           } else {
+             updateInfo = elem[2];
+             handleUpdateCmd(name, updateInfo);
+           }
+       }  else {
          console.log("Cannot parse:" + elem);
        }
      }
-
-     // Creates circle at x = 50, y = 40, with radius 10
-     //var circle = paper.circle(50, 40, 10);
-     // Sets the fill attribute of the circle to red (#f00)
-     //circle.attr("fill", "#f00");
-  
-     // Sets the stroke attribute of the circle to white
-     //circle.attr("stroke", "#fff");
   }
 
   function setInfo(data) {

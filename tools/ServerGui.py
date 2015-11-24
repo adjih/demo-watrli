@@ -75,7 +75,7 @@ class ServerGui:
         #os.system("cd " + thisPath + " && python DynamicHtml.py")
         root = os.path.dirname(__file__)+"/www-generated"
         application = tornado.web.Application([
-            (r"/", MainHandler),
+          #(r"/", MainHandler),
             (r'/ws', WSHandler),
             #(r"/auto", AutoPageHandler),
             (r"/(.*)", tornado.web.StaticFileHandler, 
