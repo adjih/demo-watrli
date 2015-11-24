@@ -6,7 +6,12 @@
   <body>
 
 <h1>Display</h1>
-<script src="http://code.jquery.com/jquery-2.0.0.js"></script>
+<script src="jquery-2.0.0.js"></script>
+<script src="raphael.js"></script>
+<script src="smoothie.js"></script>
+
+<canvas id="smoothie_canvas" width="400" height="100"></canvas>
+
 
 <h2>Measurement</h2>
 
@@ -20,11 +25,22 @@
   <tr>
     <td colspan="2"><label id="last_ws">-</label></td>
   </tr>
+
+  <tr>
+    <td colspan="2"><label id="last_info">-</label></td>
+  </tr>
+
 </table>
+
+<label id="raphael_area">-</label>
 
 <canvas id="cvs" width="1024" height="768">[No canvas support]</canvas>
 
 <script>
+
+  var paper;
+  var smoothieLine;
+  var elemTable = new Object();
 
   $(document).ready(function () {
     var ws = new WebSocket("ws://localhost:8888/ws");
@@ -36,14 +52,17 @@
                 
     ws.onmessage = function(evt) {
       var last_ws_text = document.getElementById('last_ws');
-      last_ws_text.innerHTML = evt.data;
+      //last_ws_text.innerHTML = evt.data;
       // http://stackoverflow.com/questions/4935632/parse-json-in-javascript
       var evtData = JSON.parse(evt.data);
-
+ 
       if (evtData.type === "time") {
         handleTimeMessage(evtData);
+      } else if (evtData.type == "init") {
+        handleInitMessage(evtData);
+      } else if (evtData.type == "create") {
+        handleCreateMessage(evtData);
       }
-
     };
 
     ws.onclose = function(evt) {
@@ -55,11 +74,102 @@
   function handleTimeMessage(evtData) {
      var server_time = document.getElementById('server_time');
      server_time.innerHTML = evtData.time;
+     //smoothieLine.append(evtData.x, evtData.y);
+     smoothieLine.append(new Date().getTime(), evtData.y);
   }
+
+  function handleInitMessage(evtData) {
+     var cvs = document.getElementById('raphael_area');
+     //document.getElementById('connection').innerHTML = String(evtData);
+ 
+     // Creates canvas
+     paper = Raphael(cvs, evtData.xSize, evtData.ySize);
+
+     paper.rect(0, 0, evtData.xSize, evtData.ySize, 10);
+     //paper.ball(100,100,20, 0.6);
+
+
+     // Create smoothie
+     var smoothie = new SmoothieChart({
+       grid: { strokeStyle:'rgb(125, 0, 0)', fillStyle:'rgb(60, 0, 0)',
+             lineWidth: 1, millisPerLine: 250, verticalSections: 6, },
+       labels: { fillStyle:'rgb(60, 0, 0)' }
+     });
+     smoothie.streamTo(document.getElementById("smoothie_canvas"));
+     smoothieLine = new TimeSeries();
+     smoothie.addTimeSeries(smoothieLine,
+  { strokeStyle:'rgb(0, 255, 0)', fillStyle:'rgba(0, 255, 0, 0.4)', lineWidth:3 }
+);
+
+     // Creates circle at x = 50, y = 40, with radius 10
+     //var circle = paper.circle(50, 40, 10);
+     // Sets the fill attribute of the circle to red (#f00)
+     //circle.attr("fill", "#f00");
+  
+     // Sets the stroke attribute of the circle to white
+     //circle.attr("stroke", "#fff");
+  }
+
+  function handleCreateMessage(evtData) {
+      //console.log("create");
+
+     var i;
+     for (i=0; i < evtData["content"].length; i++) {
+       var elem = evtData["content"][i];
+        // console.log(elem[1]);
+       name = elem[0];
+       if (elemTable.hasOwnProperty(name)) {
+          elemTable[name].remove();
+       }
+
+       if (elem[1] === "delete") {
+         // implicit
+       } else if (elem[1] === "ball") {
+         // console.log(elem);
+         var e = paper.ball(elem[2], elem[3], elem[4], elem[5]);
+         elemTable[name] = e;
+       } else if (elem[1] === "line") {
+         var e = paper.path(elem[2]);
+         e.attr({ "stroke": elem[3], "stroke-width": elem[4]});
+         if (elem.length > 4) {
+           e.attr({ "arrow-end": elem[5] });
+         }
+         elemTable[name] = e;
+       } else if (elem[1] === "circle") {
+         var e = paper.circle(elem[2], elem[3], elem[4]);
+         e.attr("fill", elem[5]);
+         e.attr("stroke", elem[6]);
+         elemTable[name] = e;
+       } else {
+         console.log("Cannot parse:" + elem);
+       }
+     }
+
+     // Creates circle at x = 50, y = 40, with radius 10
+     //var circle = paper.circle(50, 40, 10);
+     // Sets the fill attribute of the circle to red (#f00)
+     //circle.attr("fill", "#f00");
+  
+     // Sets the stroke attribute of the circle to white
+     //circle.attr("stroke", "#fff");
+  }
+
+  function setInfo(data) {
+     document.getElementById('last_info').innerHTML = String(data);
+  }
+
+  // Copied from http://raphaeljs.com/ball.html
+  Raphael.fn.ball = function (x, y, r, hue) {
+    hue = hue || 0;
+    return this.set(
+        this.ellipse(x, y + r - r / 5, r, r / 2).attr({fill: "rhsb(" + hue + ", 1, .25)-hsb(" + hue + ", 1, .25)", stroke: "none", opacity: 0}),
+        this.ellipse(x, y, r, r).attr({fill: "r(.5,.9)hsb(" + hue + ", 1, .75)-hsb(" + hue + ", .5, .25)", stroke: "none"}),
+        this.ellipse(x, y, r - r / 5, r - r / 20).attr({stroke: "none", fill: "r(.5,.1)#ccc-#ccc", opacity: 0})
+     );
+  };
 
 </script>
 
 
-  
   </body>
 </html>
